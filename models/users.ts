@@ -74,3 +74,44 @@ export const deleteById = async (id:any) => {
     return error
   }
 }
+
+export const findByEmail = async (email: string) => {
+  
+  const query = `SELECT * FROM users WHERE email = ?`;
+  const data = await db.run_query(query, [email]);
+
+  return data;  
+
+}
+
+// export function findOrCreate(userData: { googleId: string; email: string | undefined; name: string; }) {
+//   throw new Error("Function not implemented.");
+// }
+export async function findOrCreate(userData: { googleId: string; email: string | undefined; }) {
+  // Check if user exists with the Google ID or email
+  let query = `SELECT * FROM users WHERE google_id = ? OR email = ?`;
+  let existingUser = await db.run_query(query, [userData.googleId, userData.email]);
+
+  if (existingUser.length > 0) {
+    // User already exists, return the user
+    return existingUser[0];
+  } else {
+    // No user found, create a new user
+    let keys = Object.keys(userData).join(',');
+    let values = Object.values(userData);
+    let placeholders = values.map(() => '?').join(',');
+    query = `INSERT INTO users (${keys}) VALUES (${placeholders}) RETURNING *;`;  // Using RETURNING * to get the inserted row
+
+    try {
+      let newUser = await db.run_query(query, values);
+      if (newUser.length > 0) {
+        return newUser[0];  // Assuming the insert returns the new user data
+      } else {
+        throw new Error('User creation failed');
+      }
+    } catch (error) {
+      console.error('Error creating user:', error);
+      throw error;
+    }
+  }
+}

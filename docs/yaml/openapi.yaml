@@ -222,6 +222,25 @@ paths:
         '404':
           description: Article was not found in the DB.
 
+  /articles/search/{title}:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: String
+        required: true
+        description: Title name of the article
+    get:
+      tags:
+        - Articles
+      description:
+        Get article by title.
+      responses:
+        '200':
+          description: View of an article record.
+        '404':
+          description: Article was not found in the DB.
+
   /articles/: 
     get:
       tags:

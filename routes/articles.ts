@@ -39,7 +39,8 @@ const getAll = async (ctx: RouterContext, next: any) => {
 const {limit=100, page=1,  order="dateCreated", direction='ASC'} = ctx.request.query;
   const parsedLimit = parseInt(limit as string, 10);
   const parsedPage = parseInt(page as string, 10);
-  const result = await model.getAll(20, 1, order, direction);
+  // const result = await model.getAll(20, 1, order, direction);
+  const result = await model.getAll(20, 1);
    if (result.length) {
      const body: Post[] = result.map((post: any) => {
        const { id = 0, title = "",  alltext="",summary = "", imageurl = "",authorid = 0,description="" }: Partial<Post> = post;
@@ -93,6 +94,46 @@ const getById = async (ctx: RouterContext, next: any) => {
   }
   await next();
 }
+
+
+
+
+
+const getByTitle = async (ctx: RouterContext, next: any) => {
+
+
+  const title: string = ctx.params.title;
+  let filter: string | undefined = typeof ctx.query.filter === 'string' ? ctx.query.filter : ctx.query.filter ? ctx.query.filter[0] : undefined;
+
+  
+  let article = await model.getByTitle(title, filter || ''); 
+  
+  console.log("title:", title);
+  console.log("filter:", filter);
+  
+  if (article.length) {
+    const body: Post[] = article.map((post: any) => {
+      const { id = 0, title = "",  alltext="",summary = "", imageurl = "",authorid = 0,description="" }: Partial<Post> = post;
+      const links = {
+        likes: `http://${ctx.host}/api/v1/articles/${post.id}/likes`,
+        fav: `http://${ctx.host}/api/v1/articles/${post.id}/fav`,
+        msg: `http://${ctx.host}/api/v1/articles/${post.id}/msg`,
+        self: `http://${ctx.host}/api/v1/articles/${post.id}`
+      };
+      return { id, title,   alltext,summary, imageurl,authorid, description, links }; // Utilizing the destructured elements
+    });
+    ctx.body = body;
+    ctx.status=200;
+  } else {
+    ctx.status = 404;
+  }
+  await next();
+
+};
+
+
+
+
 
 const updateArticle = async (ctx: RouterContext, next: any) => {
   let id = +ctx.params.id;
@@ -232,6 +273,9 @@ router.post('/', basicAuth, bodyParser(), validateArticle, createArticle);
 router.get('/:id([0-9]{1,})', getById);
 router.put('/:id([0-9]{1,})', basicAuth, bodyParser(),validateArticle, updateArticle);
 router.delete('/:id([0-9]{1,})', basicAuth, deleteArticle);
+
+router.get('/search/:title?', getByTitle);
+
 router.get('/:id([0-9]{1,})/likes', likesCount);
 router.post('/:id([0-9]{1,})/likes', basicAuth, likePost);
 router.del('/:id([0-9]{1,})/likes', basicAuth, dislikePost);

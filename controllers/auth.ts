@@ -1,8 +1,9 @@
 import passport from "koa-passport";
 import { BasicStrategy } from "passport-http";
 import { RouterContext } from "koa-router";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import * as users from '../models/users';
 
-import * as users  from '../models/users';
 
 const verifyPassword = (user: any, password: string) => {
   console.log('user return pwd: '+user.password);
@@ -11,12 +12,7 @@ const verifyPassword = (user: any, password: string) => {
 }
 
 passport.use(new BasicStrategy(async (username, password, done) => {
-  // Replace this with your own authentication logic
-  /*if (username === "admin" && password === "password") {
-    done(null, { username: "admin" });
-  } else {
-    done(null, false);
-  } */
+
   let result: any[] = [];
   try {
     result = await users.findByUsername(username);
@@ -50,14 +46,30 @@ export const basicAuth = async (ctx: RouterContext, next: any) => {
     };
    
    }
-/*
-  else {
-   const user = ctx.state.user; 
-     console.log('user=> '+JSON.stringify(user))
-    console.log('status=> '+ctx.status)
-  ctx.body = {message: `Hello ${user.user.username} you registered on ${user.user.dateregistered}`} 
-    }
-    */
+
+    // Set up the Google OAuth strategy
+passport.use(new GoogleStrategy({
+  clientID: "729034240613-tcafn21qn8h2tm47l1uer6lo84hui2l7.apps.googleusercontent.com",
+  clientSecret: "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",
+  callbackURL: "/auth/google/callback"
+}, async (accessToken, refreshToken, profile, done) => {
+  if (!profile.emails || profile.emails.length === 0 || !profile.emails[0].value) {
+    return done(null, false, { message: 'No email provided by Google.' });
+  }
+  const email = profile.emails[0].value;
+  const userData = {
+    googleId: profile.id,
+    email: email
+  };
+
+  try {
+    let user = await users.findOrCreate(userData);
+    done(null, user);
+  } catch (error) {
+    done(error);
+  }
+}));
+
   }
 
 
