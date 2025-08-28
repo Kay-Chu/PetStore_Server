@@ -28,7 +28,8 @@ app.use(serve('./docs'));
 // app.use(cors());
 
 const corsOptions = {
-  origin: 'http://localhost:5173'
+  // origin: 'http://localhost:5173'
+  origin: 'http://pets.k-chu.com'
 };
 app.use(cors(corsOptions));
 
