@@ -37,8 +37,10 @@ app.use(cors(corsOptions));
 app.use(logger());
 app.use(json());
 app.use(bodyParser());
-app.use(router.routes());
 app.use(passport.initialize());
+
+
+app.use(router.routes());
 app.use(articles.middleware());
 app.use(special.middleware());
 app.use(uploads.middleware());
