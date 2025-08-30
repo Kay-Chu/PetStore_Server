@@ -29,7 +29,7 @@ app.use(serve('./docs'));
 
 const corsOptions = {
   // origin: 'http://localhost:5173'
-  origin: 'http://pets.k-chu.com'
+  origin: 'https://pets.k-chu.com'
 };
 app.use(cors(corsOptions));
 

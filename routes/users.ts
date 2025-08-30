@@ -7,15 +7,15 @@ import * as model from "../models/users";
 const prefix = "/api/v1/users";
 const router: Router = new Router({ prefix: prefix });
 
-const getAll = async (ctx: any, next: any) => {
-  let users = await model.getAll(20, 1);
-  if (users.length) {
-    ctx.body = users;
-  } else {
-    ctx.body = {};
-  }
-  await next();
-};
+// const getAll = async (ctx: any, next: any) => {
+//   let users = await model.getAll(20, 1);
+//   if (users.length) {
+//     ctx.body = users;
+//   } else {
+//     ctx.body = {};
+//   }
+//   await next();
+// };
 
 const doSearch = async (ctx: any, next: any) => {
   let { limit = 50, page = 1, fields = "", q = "" } = ctx.request.query;
